@@ -1,71 +1,100 @@
-# Windows Dev Setup Script
+# Windows Dev Setup Scripts
 
-This repository provides PowerShell scripts to automate the initial setup of a Windows development environment.
+PowerShell scripts for automating Windows initial setup and development environment configuration.
 
-## Overview
+---
 
-The scripts perform the following tasks:
+## How to Run a PowerShell Script
 
-* Create a local user
-* Grant administrator privileges
-* Disable initial privacy prompts and consumer features
-* Install Visual Studio Code
-* Configure Wi-Fi profile
-* Provide a cleanup script to remove the created user
+This script must be executed with administrative privileges.
+
+### 1. Open PowerShell as Administrator
+
+* Press `Start`
+* Search for **PowerShell**
+* Right-click → **Run as Administrator**
+
+---
+
+### 2. Execute the Script
+
+Run the following command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "<PATH_TO_SCRIPT>\<SCRIPT_NAME>.ps1"
+```
+
+### Example
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\script.ps1"
+```
+
+---
+
+### Notes
+
+* `-ExecutionPolicy Bypass` allows the script to run without permanently changing system policy
+* Replace `<PATH_TO_SCRIPT>` with the actual directory path
+* Replace `<SCRIPT_NAME>.ps1` with your script file name
+* The script will fail if not executed with Administrator privileges
 
 ---
 
 ## Scripts
 
-### 1. setup.ps1
+### 1. `oobe-setup.ps1` - OOBE Initial Setup
 
-Main setup script.
+Use this script **during or right after Windows OOBE (Out-Of-Box Experience)** to prepare the system for first use.
 
-#### Features
+* Disables OOBE Privacy Experience (registry policy)
+* Bypasses Network Requirement during OOBE (BypassNRO)
+* Creates local admin accounts interactively (username / password with confirmation)
+* Supports creating multiple accounts at once
 
-* Creates a local user (configurable)
-* Adds the user to the `Administrators` group
+---
+
+### 2. `dev-setup.ps1` - Development Environment Setup
+
+Use this script **after Windows is fully set up** to configure the development environment.
+
+* Creates a local user (hardcoded in script)
+* Grants administrator privileges
 * Applies system policies:
-
   * Disable privacy experience
   * Disable Windows consumer features
   * Disable tips and welcome screens
 * Installs Visual Studio Code:
-
   * Uses `winget` if available
   * Falls back to direct installer if necessary
 * Configures Wi-Fi:
-
-  * SSID (configurable)
-  * Password (configurable)
-  * WPA2-PSK / AES support
+  * WPA2-PSK / AES
   * Auto-connect enabled
 
+> Before running, update the variables at the top of the script:
+>
+> ```powershell
+> $UserName = "your_username"
+> $Password = "your_password"
+> $WifiSsid = "your_wifi_ssid"
+> $WifiPassword = "your_wifi_password"
+> ```
+
 ---
 
-### 2. remove.ps1
+### 3. `remove-user.ps1` - User Cleanup
 
-Cleanup script.
+Use this script to **remove a local user account** created by the setup scripts.
 
-#### Features
-
-* Removes a specified local user
 * Removes the user from all local groups
-* Deletes the user's profile directory (optional)
+* Deletes the local user account
+* Removes the user's profile directory (optional)
 
----
-
-## Configuration
-
-Before running the script, update the following variables:
-
-```powershell
-$UserName = "your_username"
-$Password = "your_password"
-
-$WifiSsid = "your_wifi_ssid"
-$WifiPassword = "your_wifi_password"
-```
+> Before running, update the variable at the top of the script:
+>
+> ```powershell
+> $UserName = "target_username"
+> ```
 
 ---
 
@@ -73,38 +102,8 @@ $WifiPassword = "your_wifi_password"
 
 * Windows 10 / 11
 * Administrator privileges
-* Internet connection (required for software installation)
+* Internet connection (required for software installation in `dev-setup.ps1`)
 * Wi-Fi adapter enabled (if using wireless configuration)
-
----
-
-## Usage
-
-### 1. Run PowerShell as Administrator
-
-### 2. Allow script execution (first time only)
-
-```powershell
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### 3. Run setup script
-
-```powershell
-.\setup.ps1
-```
-
-### 4. Reboot and login with the created user
-
----
-
-## Wi-Fi Notes
-
-* The script assumes:
-
-  * WPA2-Personal (WPA2-PSK)
-  * AES encryption
-* Adjust authentication/encryption settings if your network differs
 
 ---
 
@@ -122,12 +121,9 @@ winget source reset --force
 
 * If `winget` is not working, the script will attempt a direct installer
 
----
-
 ### Wi-Fi connection fails
 
 * Check:
-
   * Airplane mode is OFF
   * Wi-Fi adapter is enabled
   * Correct credentials are provided
@@ -150,4 +146,3 @@ netsh wlan show interfaces
 ## License
 
 MIT License
-
