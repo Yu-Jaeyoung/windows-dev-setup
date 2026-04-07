@@ -82,7 +82,33 @@ Use this script **after Windows is fully set up** to configure the development e
 
 ---
 
-### 3. `remove-user.ps1` - User Cleanup
+### 3. `exam-lockdown.ps1` - Exam Lockdown
+
+Use this script to **temporarily lock down a PC for exams or assessments**. Operates in two modes via the `-Mode` parameter.
+
+#### Setup mode (`-Mode Setup`)
+
+* Creates managed local admin accounts interactively
+* Disables specified existing accounts (protects managed accounts, keep-enabled list, and current session user)
+* Restricts Wi-Fi: deny-all filter + optional SSID whitelist
+
+#### Restore mode (`-Mode Restore`)
+
+* Disables managed accounts created during setup
+* Re-enables previously disabled accounts
+* Removes Wi-Fi restrictions (allowed SSIDs + deny-all filter)
+
+```powershell
+# Lock down
+powershell -ExecutionPolicy Bypass -File "exam-lockdown.ps1" -Mode Setup
+
+# Restore
+powershell -ExecutionPolicy Bypass -File "exam-lockdown.ps1" -Mode Restore
+```
+
+---
+
+### 4. `remove-user.ps1` - User Cleanup
 
 Use this script to **remove a local user account** created by the setup scripts.
 
