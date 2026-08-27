@@ -124,6 +124,23 @@ Use this script to **remove a local user account** created by the setup scripts.
 
 ---
 
+### 5. `user-account-setup.ps1` - Managed User Account Setup
+
+Run this script while signed in with the local `user` account.
+
+* Keeps the `user` account enabled
+* Creates and enables the following local administrator accounts:
+  * `java` / `java2026`
+  * `dbalgo` / `dbalgo2026`
+* Updates the password and re-enables either managed account if it already exists
+* Disables every other local account without deleting it
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "user-account-setup.ps1"
+```
+
+---
+
 ## Requirements
 
 * Windows 10 / 11
