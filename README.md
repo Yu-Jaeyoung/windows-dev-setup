@@ -141,6 +141,69 @@ powershell -ExecutionPolicy Bypass -File "user-account-setup.ps1"
 
 ---
 
+### 6. Java Midterm Setup and Restore
+
+Copy both `javamidterm-setup.ps1` and `javamidterm-restore.ps1` to the `user` account's
+Desktop (`C:\Users\user\Desktop`), following the existing script execution pattern.
+Run from a local console using
+64-bit Windows PowerShell as Administrator, not over a Wi-Fi remote session.
+The existing `user`, `java` and `dbalgo` accounts must exist, and at least one
+must already be an administrator. No software is installed.
+
+```powershell
+# Before the exam, signed in as user, as Administrator:
+powershell.exe -ExecutionPolicy Bypass -File "C:\Users\user\Desktop\javamidterm-setup.ps1"
+
+# After the exam, from javamidterm, as Administrator:
+powershell.exe -ExecutionPolicy Bypass -File "C:\Users\user\Desktop\javamidterm-restore.ps1"
+```
+
+The commands work from `C:\Windows\System32`; changing directories is unnecessary.
+The restore command intentionally refers to the original `user` Desktop, not the
+`javamidterm` Desktop. If its permissions prevent access, copy the restore file to
+the `javamidterm` Desktop and use that file's full path.
+
+Setup:
+
+* Creates or updates `javamidterm` with password `261014`, enables it, and grants administrator rights.
+* Applies the existing privacy, consumer-feature and tips suppression settings, plus welcome-experience suppression.
+* Sets `BypassNRO=1`, as in `oobe-setup.ps1`. Windows build/edition and organization policies can limit these settings; this is not a guarantee that every OOBE or first-login screen will be skipped. Normal first-login profile creation still occurs.
+* Records the GUID, PnP device ID and name of each enabled physical Wi-Fi adapter in `HKLM:\SOFTWARE\WindowsDevSetup\JavaMidterm` (`AdaptersJson`) BEFORE disabling it. Repeated setup preserves outstanding recovery records. Adapter discovery includes hidden interfaces but excludes virtual interfaces. Wired Ethernet is unchanged; no WLAN filter is added.
+* Disables every other local account, including the account running the script, only after the preceding steps succeed.
+
+Restore:
+
+* Enables only `user`, `java` and `dbalgo`, preserving their passwords and group memberships.
+* Restores devices by saved GUID/PnP identity, not by reclassifying a disabled device as Wi-Fi. It uses PnP to enable disabled hardware when needed and WMI/NetAdapter to enable and verify the interface. Only verified records are cleared; failures remain recorded for retry. Other devices are still attempted if one recovery fails.
+* Supports the original `WifiAdapterGuids` record. For old PCs without a current recovery plan, it discovers physical wireless devices using hidden NDIS interfaces, WMI wireless metadata/device names and present PCI/USB/SD wireless PnP devices. This fallback may also enable a wireless device that was disabled before setup, since the old scripts did not record its original state. No setup rerun is required. Unidentifiable or missing devices are reported, not treated as successfully recovered.
+* Attempts to remove the legacy deny-all WLAN filter left by the earlier filter-based setup. This is compatibility cleanup; the current setup does not add that filter. An absent filter may produce a warning.
+* After enabling and verifying the recovery accounts, attempts network recovery and disables all other local accounts, including `javamidterm`. Unresolved device records produce warnings and do not prevent account cleanup. Accounts and profiles are not deleted.
+* Keeps initial setup suppression policies applied.
+
+Disabling an account does not terminate its existing session. Sign out of other
+sessions before the exam and sign out of `javamidterm` after restoring.
+Administrator users can undo the Wi-Fi/account restrictions. Setup stops if no
+physical Wi-Fi adapter is found. Restore retains unresolved device records for retry
+and reports network warnings while completing account recovery. Account validation
+failures and failures outside individual device recovery still stop the script.
+Disabling an adapter may hide the Wi-Fi page in Windows Settings until it is enabled
+again. Restore enables the adapters before attempting legacy filter cleanup; failure
+of that cleanup is reported as unconfirmed without preventing account recovery.
+Localized `netsh` output is suppressed; script failures
+use English labels with the line number, command, error type and HResult. ASCII-only
+exception details are also displayed. PowerShell startup errors (such as failed
+`#Requires` checks) are generated before the script runs and may still be localized.
+If the password `261014` is rejected
+by password policy, setup stops before disabling Wi-Fi or other accounts and does
+not weaken that policy. Failures may leave partial changes; resolve the reported
+error and rerun setup or restore. Neither script automatically signs out or restarts.
+
+Removing a WLAN filter alone does not re-enable a disabled adapter, so restore
+performs both operations. An enabled adapter is not proof of an Internet connection;
+an available network, valid credentials and an enabled hardware radio are still needed.
+
+---
+
 ## Requirements
 
 * Windows 10 / 11
